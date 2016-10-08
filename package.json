@@ -1,0 +1,43 @@
+{
+  "name": "adonis-cache",
+  "version": "0.1.0",
+  "description": "Cache provider for AdonisJs framework",
+  "scripts": {
+    "test": "node node_modules/.bin/mocha",
+    "lint": "standard src/**/*.js test/*.js providers/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/helnokaly/adonis-cache.git"
+  },
+  "keywords": [
+    "adonisjs",
+    "adonis",
+    "cache",
+    "caching"
+  ],
+  "author": "Hany El Nokaly",
+  "license": "MIT",
+  "homepage": "https://github.com/helnokaly/adonis-cache",
+  "devDependencies": {
+    "adonis-ace": "^3.0.4",
+    "adonis-fold": "^3.0.3",
+    "chai": "^3.5.0",
+    "co-mocha": "^1.1.3",
+    "ioredis": "^2.4.0",
+    "knex": "^0.12.2",
+    "mocha": "^3.1.0",
+    "sqlite3": "^3.1.4",
+    "standard": "^8.3.0"
+  },
+  "dependencies": {
+    "co": "^4.6.0",
+    "lodash": "^4.16.2"
+  },
+  "standard": {
+    "globals": [
+      "describe",
+      "it"
+    ]
+  }
+}
