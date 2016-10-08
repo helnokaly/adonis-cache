@@ -281,8 +281,8 @@ yield Cache.tags('authors').flush()
 To execute code on every cache operation, you may listen for the [events](http://www.adonisjs.com/docs/3.0/events) fired by the cache. Typically, you should place these event listeners within your `bootstrap/events.js`:
 
 ```
-cache.hit
-cache.missed
-cache.key.forgotten
-cache.key.written
+Cache.hit
+Cache.missed
+Cache.keyForgotten
+Cache.keyWritten
 ```

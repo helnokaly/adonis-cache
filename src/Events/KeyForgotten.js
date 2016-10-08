@@ -23,6 +23,6 @@ class KeyForgotten {
   }
 }
 
-KeyForgotten.EVENT = 'key.forgotten'
+KeyForgotten.EVENT = 'Cache.keyForgotten'
 
 module.exports = KeyForgotten

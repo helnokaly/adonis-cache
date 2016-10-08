@@ -23,6 +23,6 @@ class CacheMissed {
   }
 }
 
-CacheMissed.EVENT = 'cache.missed'
+CacheMissed.EVENT = 'Cache.missed'
 
 module.exports = CacheMissed

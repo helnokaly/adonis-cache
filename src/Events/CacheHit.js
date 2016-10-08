@@ -25,6 +25,6 @@ class CacheHit {
   }
 }
 
-CacheHit.EVENT = 'cache.hit'
+CacheHit.EVENT = 'Cache.hit'
 
 module.exports = CacheHit

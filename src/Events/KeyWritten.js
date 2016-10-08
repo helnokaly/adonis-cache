@@ -27,6 +27,6 @@ class KeyWritten {
   }
 }
 
-KeyWritten.EVENT = 'key.written'
+KeyWritten.EVENT = 'Cache.keyWritten'
 
 module.exports = KeyWritten
