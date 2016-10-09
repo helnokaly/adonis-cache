@@ -119,7 +119,7 @@ class UserController {
 You may access various cache stores via the `store` method. The key passed to the `store` method should correspond to one of the stores listed in the `stores` configuration object in your `cache` configuration file:
 
 ```javascript
-value = yield Cache.store('file').get('foo')
+value = yield Cache.store('database').get('foo')
 
 yield Cache.store('redis').put('bar', 'baz', 10)
 ```
