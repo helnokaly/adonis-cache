@@ -157,7 +157,7 @@ class ObjectStore extends TaggableStore {
    * @return {Promise<void>}
    */
   forever (key, value) {
-    return this.put(key, Util.serialize(value), 5256000)
+    return this.put(key, value, 5256000)
   }
 
   /**
