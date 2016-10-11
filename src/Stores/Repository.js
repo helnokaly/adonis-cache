@@ -110,10 +110,6 @@ class Repository {
    */
   get (key, defaultValue = null) {
     return co(function * () {
-      if (Array.isArray(key)) {
-        return this.many(key)
-      }
-
       let value = yield this._store.get(yield this._itemKey(key))
 
       if (value == null) {
@@ -175,10 +171,6 @@ class Repository {
    */
   put (key, value, minutes = null) {
     return co(function * () {
-      if (typeof key === 'object') {
-        return yield this.putMany(key, value)
-      }
-
       if (value == null) {
         return
       }
