@@ -29,7 +29,6 @@ class Repository {
   constructor (store) {
     this._store = store // The cache store implementation
     this._events = null // The event dispatcher implementation
-    this._defaultCacheTime = 60 // The default number of minutes to store items
 
     return new Proxy(this, {
       get: function (target, name) {
@@ -368,7 +367,6 @@ class Repository {
         taggedCache.setEventDispatcher(this._events)
       }
 
-      taggedCache.setDefaultCacheTime(this._defaultCacheTime)
       return taggedCache
     }
     throw new Error('BadMethodCallException: This cache store does not support tagging.')
@@ -387,72 +385,12 @@ class Repository {
   }
 
   /**
-   * Get the default cache time.
-   *
-   * @return {float|int}
-   */
-  getDefaultCacheTime () {
-    return this._defaultCacheTime
-  }
-
-  /**
-   * Set the default cache time in minutes.
-   *
-   * @param  {float|int}  minutes
-   * @return {void}
-   */
-  setDefaultCacheTime (minutes) {
-    this._defaultCacheTime = minutes
-  }
-
-  /**
    * Get the cache store implementation.
    *
    * @return {Store}
    */
   getStore () {
     return this._store
-  }
-
-  /**
-   * Determine if a cached value exists.
-   *
-   * @param  {string}  key
-   * @return {Promise<boolean>}
-   */
-  offsetExists (key) {
-    return this.has(key)
-  }
-
-  /**
-   * Retrieve an item from the cache by key.
-   *
-   * @param  {string}  key
-   * @return {Promise<mixed>}
-   */
-  offsetGet (key) {
-    return this.get(key)
-  }
-
-  /**
-   * Store an item in the cache for the default time.
-   *
-   * @param  {string}  key
-   * @param  {mixed}   value
-   * @return {Promsie<void>}
-   */
-  offsetSet (key, value) {
-    return this.put(key, value, this._defaultCacheTime)
-  }
-
-  /**
-   * Remove an item from the cache.
-   *
-   * @param  {string}  key
-   * @return {Promise<void>}
-   */
-  offsetUnset (key) {
-    return this.forget(key)
   }
 
   /**
