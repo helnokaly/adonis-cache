@@ -65,9 +65,9 @@ class DatabaseStore {
     return co(function * () {
       let mappedValues = {}
       for (let key of keys) {
-        mappedValues[key] = yield this.get(key)
+        mappedValues[key] = this.get(key)
       }
-      return mappedValues
+      return yield mappedValues
     }.bind(this))
   }
 

@@ -50,9 +50,9 @@ class RedisStore extends TaggableStore {
     return co(function * () {
       let mappedValues = {}
       for (let i = 0; i < keys.length; i++) {
-        mappedValues[keys[i]] = yield this.get(keys[i])
+        mappedValues[keys[i]] = this.get(keys[i])
       }
-      return mappedValues
+      return yield mappedValues
     }.bind(this))
   }
 
