@@ -142,6 +142,17 @@ value = yield Cache.get('key', function * () {
 });
 ```
 
+Retrieving multiple items:
+
+```javascript
+values = yield Cache.many(['key1', 'key2', 'key3'])
+//  values = {
+//    key1: value,
+//    key2: value,
+//    key3: value
+//  }
+```
+
 #### Checking For Item Existence
 
 The `has` method may be used to determine if an item exists in the cache:
@@ -168,7 +179,7 @@ yield Cache.decrement('key', amount)
 Sometimes you may wish to retrieve an item from the cache, but also store a default value if the requested item doesn't exist. For example, you may wish to retrieve all users from the cache or, if they don't exist, retrieve them from the database and add them to the cache. You may do this using the `Cache.remember` method:
 
 ```javascript
-value = Cache.remember('key', minutes, function * () {
+value = yield Cache.remember('key', minutes, function * () {
   return yield Database.table(...).where(...).first()
 })
 ```
@@ -198,6 +209,18 @@ Instead of passing the number of minutes as an integer, you may also pass a `Dat
 const expiresAt = new Date(2016, 11, 1, 12, 0)
 
 yield Cache.put('key', 'value', expiresAt)
+```
+
+Storing multiple items:
+
+```javascript
+const items = {
+  key1: 'value1',
+  key2: 'value2',
+  key3: 'value3'
+}
+
+yield Cache.putMany(items, minutes)
 ```
 
 #### Store If Not Present
