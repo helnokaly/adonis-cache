@@ -3,12 +3,7 @@
 const chai = require('chai')
 const expect = chai.expect
 
-const encryptionStub = {
-  encrypt: s => s,
-  decrypt: s => s
-}
-
-const Store = new (require('../src/Stores/ObjectStore'))(encryptionStub)
+const Store = new (require('../src/Stores/ObjectStore'))()
 
 describe('Object Store', function () {
   const name = 'David'
