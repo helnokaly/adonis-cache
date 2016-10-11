@@ -141,11 +141,7 @@ class CacheManager {
   _createDatabaseDriver (config) {
     const connection = this._app.use('Adonis/Src/Database').connection(config['connection'])
 
-    return this.repository(
-        new DatabaseStore(
-            connection, this._app.use('Adonis/Src/Encryption'), config['table'], this._getPrefix(config)
-        )
-    )
+    return this.repository(new DatabaseStore(connection, config['table'], this._getPrefix(config)))
   }
 
   /**

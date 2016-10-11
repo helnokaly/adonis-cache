@@ -12,12 +12,7 @@ const knex = require('knex')({
   useNullAsDefault: true
 })
 
-const encryptionStub = {
-  encrypt: s => s,
-  decrypt: s => s
-}
-
-const Store = new (require('../src/Stores/DatabaseStore'))(knex, encryptionStub, 'cache', 'adonis')
+const Store = new (require('../src/Stores/DatabaseStore'))(knex, 'cache', 'adonis')
 
 describe('Database Store', function () {
   describe('Initializing', function () {

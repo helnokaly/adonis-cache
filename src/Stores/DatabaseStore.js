@@ -14,10 +14,9 @@ const Util = require('../Util')
 
 class DatabaseStore {
 
-  constructor (connection, encrypter, tableName, prefix = '') {
+  constructor (connection, tableName, prefix = '') {
     this._connection = connection
     this._tableName = tableName
-    this._encrypter = encrypter
     this._prefix = prefix
   }
 
@@ -50,7 +49,7 @@ class DatabaseStore {
         return null
       }
 
-      return Util.deserialize(this._encrypter.decrypt(cache.value))
+      return Util.deserialize(cache.value)
     }.bind(this))
   }
 
@@ -83,13 +82,13 @@ class DatabaseStore {
   put (key, value, minutes = 0) {
     return co(function * () {
       const prefixedKey = this._prefix + key
-      const encryptedValue = this._encrypter.encrypt(Util.serialize(value))
+      const serializedValue = Util.serialize(value)
       const expiration = Math.floor((Date.now() / 1000) + minutes * 60)
 
       try {
-        yield this._table().insert({key: prefixedKey, value: encryptedValue, expiration: expiration})
+        yield this._table().insert({key: prefixedKey, value: serializedValue, expiration: expiration})
       } catch (e) {
-        yield this._table().where('key', prefixedKey).update({value: encryptedValue, expiration: expiration})
+        yield this._table().where('key', prefixedKey).update({value: serializedValue, expiration: expiration})
       }
     }.bind(this))
   }
@@ -155,13 +154,13 @@ class DatabaseStore {
               resolve(false)
               return
             }
-            const currentValue = parseInt(this._encrypter.decrypt(r.value))
+            const currentValue = parseInt(r.value)
             if (isNaN(currentValue)) {
               resolve(false)
               return
             }
             const newValue = Util.serialize(callback(currentValue))
-            return trx.table(this._tableName).where('key', prefixedKey).update('value', this._encrypter.encrypt(newValue))
+            return trx.table(this._tableName).where('key', prefixedKey).update('value', newValue)
               .then(r => resolve(newValue))
           })
           .catch(error => reject(error))
@@ -211,15 +210,6 @@ class DatabaseStore {
    */
   getConnection () {
     return this._connection
-  }
-
-  /**
-   * Get the encrypter instance.
-   *
-   * @return {Adonis/Src/Encryption}
-   */
-  getEncrypter () {
-    return this._encrypter
   }
 
   /**
