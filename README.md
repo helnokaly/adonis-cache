@@ -244,7 +244,7 @@ yield Cache.forever('key', 'value')
 
 You may remove items from the cache using the `forget` method:
 
-```javasript
+```javascript
 yield Cache.forget('key')
 ```
 
