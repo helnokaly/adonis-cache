@@ -11,6 +11,7 @@
 
 const ObjectStore = require('./ObjectStore')
 const RedisStore = require('./RedisStore')
+const NullStore = require('./NullStore')
 const DatabaseStore = require('./DatabaseStore')
 const Repository = require('./Repository')
 
@@ -109,9 +110,19 @@ class CacheManager {
   }
 
   /**
+   * Create an instance of the Null cache driver.
+   *
+   * @return {Repository}
+   * @private
+   */
+  _createNullDriver () {
+    return this.repository(new NullStore())
+  }
+
+  /**
    * Create an instance of the object cache driver.
    *
-   * @return {ObjectStore}
+   * @return {Repository}
    * @private
    */
   _createObjectDriver () {
@@ -122,7 +133,7 @@ class CacheManager {
    * Create an instance of the Redis cache driver.
    *
    * @param  {object}  config
-   * @return {RedisStore}
+   * @return {Repository}
    * @private
    */
   _createRedisDriver (config) {
@@ -135,7 +146,7 @@ class CacheManager {
    * Create an instance of the database cache driver.
    *
    * @param  {object}  config
-   * @return {DatabaseStore}
+   * @return {Repository}
    * @private
    */
   _createDatabaseDriver (config) {
