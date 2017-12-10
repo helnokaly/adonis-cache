@@ -138,7 +138,7 @@ class CacheManager {
    */
   _createRedisDriver (config) {
     const redis = this._app.use('Adonis/Addons/Redis')
-    const connection = config['connection'] ? config['connection'] : 'default'
+    const connection = config['connection'] ? config['connection'] : 'local'
     return this.repository(new RedisStore(redis, this._getPrefix(config), connection))
   }
 

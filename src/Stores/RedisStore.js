@@ -16,7 +16,7 @@ const RedisTaggedCache = require('./RedisTaggedCache')
 const TagSet = require('./TagSet')
 
 class RedisStore extends TaggableStore {
-  constructor (Redis, prefix = '', connection = 'default') {
+  constructor (Redis, prefix = '', connection) {
     super()
     this._redis = Redis
     this._prefix = prefix
