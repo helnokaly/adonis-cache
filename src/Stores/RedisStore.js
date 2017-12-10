@@ -10,14 +10,12 @@
 */
 
 const _ = require('lodash')
-const co = require('co')
 const TaggableStore = require('./TaggableStore')
 const Util = require('../Util')
 const RedisTaggedCache = require('./RedisTaggedCache')
 const TagSet = require('./TagSet')
 
 class RedisStore extends TaggableStore {
-
   constructor (Redis, prefix = '', connection = 'default') {
     super()
     this._redis = Redis
@@ -32,10 +30,8 @@ class RedisStore extends TaggableStore {
    * @param  {string} key
    * @return {Promise<mixed>}
    */
-  get (key) {
-    return co(function * () {
-      return Util.deserialize(yield this.connection().get(this._prefix + key))
-    }.bind(this))
+  async get (key) {
+    return Util.deserialize(await this.connection().get(this._prefix + key))
   }
 
   /**
@@ -46,14 +42,13 @@ class RedisStore extends TaggableStore {
    * @param  {Array<string>}  keys
    * @return {Promise<array>}
    */
-  many (keys) {
-    return co(function * () {
-      let mappedValues = {}
-      for (let i = 0; i < keys.length; i++) {
-        mappedValues[keys[i]] = this.get(keys[i])
-      }
-      return yield mappedValues
-    }.bind(this))
+  async many (keys) {
+    let values = await Promise.all(keys.map(key => this.get(key)))
+    let mappedValues = {}
+    for (let i = 0; i < keys.length; i++) {
+      mappedValues[keys[i]] = values[i]
+    }
+    return mappedValues
   }
 
   /**
@@ -64,18 +59,16 @@ class RedisStore extends TaggableStore {
    * @param  {int}     minutes
    * @return {Promise<void>}
    */
-  put (key, value, minutes = 0) {
-    return co(function * () {
-      const prefixedKey = this._prefix + key
-      let expiration = Math.floor(minutes * 60)
-      const serializedValue = Util.serialize(value)
+  async put (key, value, minutes = 0) {
+    const prefixedKey = this._prefix + key
+    let expiration = Math.floor(minutes * 60)
+    const serializedValue = Util.serialize(value)
 
-      if (isNaN(expiration) || expiration < 1) {
-        expiration = 1
-      }
+    if (isNaN(expiration) || expiration < 1) {
+      expiration = 1
+    }
 
-      yield this.connection().setex(prefixedKey, expiration, serializedValue)
-    }.bind(this))
+    await this.connection().setex(prefixedKey, expiration, serializedValue)
   }
 
   /**
@@ -85,12 +78,10 @@ class RedisStore extends TaggableStore {
    * @param  {int}     minutes
    * @return {Promise<void>}
    */
-  putMany (object, minutes) {
-    return co(function * () {
-      for (let prop in object) {
-        yield this.put(prop, object[prop], minutes)
-      }
-    }.bind(this))
+  async putMany (object, minutes) {
+    for (let prop in object) {
+      await this.put(prop, object[prop], minutes)
+    }
   }
 
   /**
@@ -100,18 +91,16 @@ class RedisStore extends TaggableStore {
    * @param  {mixed}   value
    * @return {Promise<int|boolean>}
    */
-  increment (key, value = 1) {
-    return co(function * () {
-      try {
-        return yield this.connection().incrby(this._prefix + key, value)
-      } catch (error) {
-        if (error.name === 'ReplyError') {
-          return false
-        } else {
-          throw error
-        }
+  async increment (key, value = 1) {
+    try {
+      return await this.connection().incrby(this._prefix + key, value)
+    } catch (error) {
+      if (error.name === 'ReplyError') {
+        return false
+      } else {
+        throw error
       }
-    }.bind(this))
+    }
   }
 
   /**
@@ -121,18 +110,16 @@ class RedisStore extends TaggableStore {
    * @param  {mixed}   value
    * @return {Promise<int|boolean>}
    */
-  decrement (key, value = 1) {
-    return co(function * () {
-      try {
-        return yield this.connection().decrby(this._prefix + key, value)
-      } catch (error) {
-        if (error.name === 'ReplyError') {
-          return false
-        } else {
-          throw error
-        }
+  async decrement (key, value = 1) {
+    try {
+      return await this.connection().decrby(this._prefix + key, value)
+    } catch (error) {
+      if (error.name === 'ReplyError') {
+        return false
+      } else {
+        throw error
       }
-    }.bind(this))
+    }
   }
 
   /**
@@ -142,10 +129,8 @@ class RedisStore extends TaggableStore {
    * @param  {mixed}   value
    * @return {Promise<void>}
    */
-  forever (key, value) {
-    return co(function * () {
-      yield this.connection().set(this._prefix + key, Util.serialize(value))
-    }.bind(this))
+  async forever (key, value) {
+    await this.connection().set(this._prefix + key, Util.serialize(value))
   }
 
   /**
@@ -154,11 +139,9 @@ class RedisStore extends TaggableStore {
    * @param  {string}  key
    * @return {Promise<boolean>}
    */
-  forget (key) {
-    return co(function * () {
-      yield this.connection().del(this._prefix + key)
-      return true
-    }.bind(this))
+  async forget (key) {
+    await this.connection().del(this._prefix + key)
+    return true
   }
 
   /**
@@ -166,10 +149,8 @@ class RedisStore extends TaggableStore {
    *
    * @return {Promise<void>}
    */
-  flush () {
-    return co(function * () {
-      yield this.connection().flushdb()
-    }.bind(this))
+  async flush () {
+    await this.connection().flushdb()
   }
 
   /**
@@ -230,7 +211,6 @@ class RedisStore extends TaggableStore {
   setPrefix (prefix) {
     this.prefix = !_.isEmpty(prefix) ? prefix + ':' : ''
   }
-
 }
 
 module.exports = RedisStore

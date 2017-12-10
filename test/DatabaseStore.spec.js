@@ -2,7 +2,6 @@
 
 const chai = require('chai')
 const expect = chai.expect
-require('co-mocha')
 
 const knex = require('knex')({
   client: 'sqlite3',
@@ -16,15 +15,15 @@ const Store = new (require('../src/Stores/DatabaseStore'))(knex, 'cache', 'adoni
 
 describe('Database Store', function () {
   describe('Initializing', function () {
-    it('Should create a database table for caching if it does not exist or empty existing one', function * () {
+    it('Should create a database table for caching if it does not exist or empty existing one', async () => {
       try {
-        yield knex.schema.createTableIfNotExists('cache', function (table) {
+        await knex.schema.createTableIfNotExists('cache', function (table) {
           table.string('key').unique()
           table.text('value')
           table.integer('expiration')
         })
       } catch (error) {
-        yield knex.table('cache').delete()
+        await knex.table('cache').delete()
       }
     })
   })
@@ -41,111 +40,111 @@ describe('Database Store', function () {
   const array = ['string', 1, 2.0, {}]
 
   describe('put', function () {
-    it('Should put key in cache and return void (value is string)', function * () {
-      expect(yield Store.put('name', name, 1)).to.equal(undefined)
+    it('Should put key in cache and return void (value is string)', async () => {
+      expect(await Store.put('name', name, 1)).to.equal(undefined)
     })
-    it('Should put key in cache and return void (value is integer)', function * () {
-      expect(yield Store.put('age', age, 1)).to.equal(undefined)
+    it('Should put key in cache and return void (value is integer)', async () => {
+      expect(await Store.put('age', age, 1)).to.equal(undefined)
     })
-    it('Should put key in cache and return void (value is float)', function * () {
-      expect(yield Store.put('height', height, 1)).to.equal(undefined)
+    it('Should put key in cache and return void (value is float)', async () => {
+      expect(await Store.put('height', height, 1)).to.equal(undefined)
     })
-    it('Should put key in cache and return void (value is plain object)', function * () {
-      expect(yield Store.put('person', person, 1)).to.equal(undefined)
+    it('Should put key in cache and return void (value is plain object)', async () => {
+      expect(await Store.put('person', person, 1)).to.equal(undefined)
     })
-    it('Should put key in cache and return void (value is array)', function * () {
-      expect(yield Store.put('array', array, 1)).to.equal(undefined)
+    it('Should put key in cache and return void (value is array)', async () => {
+      expect(await Store.put('array', array, 1)).to.equal(undefined)
     })
   })
 
   describe('get', function () {
-    it('Should get cached value (value is string)', function * () {
-      expect(yield Store.get('name')).to.equal(name)
+    it('Should get cached value (value is string)', async () => {
+      expect(await Store.get('name')).to.equal(name)
     })
-    it('Should get cached value (value is integer)', function * () {
-      expect(yield Store.get('age')).to.equal(age)
+    it('Should get cached value (value is integer)', async () => {
+      expect(await Store.get('age')).to.equal(age)
     })
-    it('Should get cached value (value is float)', function * () {
-      expect(yield Store.get('height')).to.equal(height)
+    it('Should get cached value (value is float)', async () => {
+      expect(await Store.get('height')).to.equal(height)
     })
-    it('Should get cached value (value is plain object)', function * () {
-      expect(yield Store.get('person')).to.deep.equal(person)
+    it('Should get cached value (value is plain object)', async () => {
+      expect(await Store.get('person')).to.deep.equal(person)
     })
-    it('Should get cached value (value is array)', function * () {
-      expect(yield Store.get('array')).to.deep.equal(array)
+    it('Should get cached value (value is array)', async () => {
+      expect(await Store.get('array')).to.deep.equal(array)
     })
-    it('Should return null for a key that is not cached', function * () {
-      expect(yield Store.get('unknown')).to.equal(null)
+    it('Should return null for a key that is not cached', async () => {
+      expect(await Store.get('unknown')).to.equal(null)
     })
   })
 
   describe('many', function () {
-    it('Should get many cached value at once', function * () {
-      expect(yield Store.many(['name', 'age', 'height'])).to.deep.equal({name, age, height})
+    it('Should get many cached value at once', async () => {
+      expect(await Store.many(['name', 'age', 'height'])).to.deep.equal({name, age, height})
     })
   })
 
   describe('flush', function () {
-    it('Should flush cached data and return void', function * () {
-      expect(yield Store.flush()).to.equal(undefined)
+    it('Should flush cached data and return void', async () => {
+      expect(await Store.flush()).to.equal(undefined)
     })
-    it('Should get null for cached data after flushing', function * () {
-      expect(yield Store.get('name')).to.equal(null)
+    it('Should get null for cached data after flushing', async () => {
+      expect(await Store.get('name')).to.equal(null)
     })
-    it('Should get null for cached data after flushing', function * () {
-      expect(yield Store.get('age')).to.equal(null)
+    it('Should get null for cached data after flushing', async () => {
+      expect(await Store.get('age')).to.equal(null)
     })
-    it('Should get null for cached data after flushing', function * () {
-      expect(yield Store.get('height')).to.equal(null)
+    it('Should get null for cached data after flushing', async () => {
+      expect(await Store.get('height')).to.equal(null)
     })
   })
 
   describe('putMany', function () {
-    it('Should put many key:value pairs in cache and return void', function * () {
-      expect(yield Store.putMany(person, 1)).to.equal(undefined)
+    it('Should put many key:value pairs in cache and return void', async () => {
+      expect(await Store.putMany(person, 1)).to.equal(undefined)
     })
-    it('Should get cached value added through putMany', function * () {
-      expect(yield Store.get('name')).to.equal(name)
+    it('Should get cached value added through putMany', async () => {
+      expect(await Store.get('name')).to.equal(name)
     })
-    it('Should get cached value added through putMany', function * () {
-      expect(yield Store.get('age')).to.equal(age)
+    it('Should get cached value added through putMany', async () => {
+      expect(await Store.get('age')).to.equal(age)
     })
-    it('Should get cached value added through putMany', function * () {
-      expect(yield Store.get('height')).to.equal(height)
+    it('Should get cached value added through putMany', async () => {
+      expect(await Store.get('height')).to.equal(height)
     })
   })
 
   describe('forget', function () {
-    it('Should forget a key and return true', function * () {
-      expect(yield Store.forget('name')).to.equal(true)
+    it('Should forget a key and return true', async () => {
+      expect(await Store.forget('name')).to.equal(true)
     })
-    it('Should get get null for forgotten key', function * () {
-      expect(yield Store.get('name')).to.equal(null)
+    it('Should get get null for forgotten key', async () => {
+      expect(await Store.get('name')).to.equal(null)
     })
   })
 
   describe('increment', function () {
-    it('Should increment age and return incremented value', function * () {
-      expect((yield Store.increment('age')) == 27).to.equal(true)
+    it('Should increment age and return incremented value', async () => {
+      expect((await Store.increment('age')) === 27).to.equal(true)
     })
-    it('Should return false for unincrementable value', function * () {
-      expect(yield Store.increment('tags')).to.equal(false)
+    it('Should return false for unincrementable value', async () => {
+      expect(await Store.increment('tags')).to.equal(false)
     })
   })
 
   describe('decrement', function () {
-    it('Should decrement age and return incremented value', function * () {
-      expect((yield Store.decrement('age', 7)) == 20).to.equal(true)
+    it('Should decrement age and return incremented value', async () => {
+      expect((await Store.decrement('age', 7)) === 20).to.equal(true)
     })
-    it('Should return false for undecrementable value', function * () {
-      expect(yield Store.increment('tags')).to.equal(false)
+    it('Should return false for undecrementable value', async () => {
+      expect(await Store.increment('tags')).to.equal(false)
     })
   })
 
   describe('expiration', function () {
-    it('Should put a new key to test expiration', function * () {
-      yield Store.put('framework', 'adonis', 1)
-      expect(yield Store.get('framework')).to.equal('adonis')
+    it('Should put a new key to test expiration', async () => {
+      await Store.put('framework', 'adonis', 1)
+      expect(await Store.get('framework')).to.equal('adonis')
     })
 
     it('Should not be able to get key value after 1 minute', function (done) {

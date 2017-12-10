@@ -9,22 +9,35 @@
  * file that was distributed with this source code.
 */
 
-const ServiceProvider = require('adonis-fold').ServiceProvider
+const { ServiceProvider } = require('@adonisjs/fold')
 
 class CommandsProvider extends ServiceProvider {
+  /**
+   * Register all the required providers
+   *
+   * @method register
+   *
+   * @return {void}
+   */
+  register () {
+    this.app.bind('Adonis/Commands/Cache:Config', () => require('../commands/ConfigGenerator'))
+    this.app.bind('Adonis/Commands/Cache:Table', () => require('../commands/TableGenerator'))
+  }
 
-  * register () {
-    this.app.bind(`Adonis/Commands/Cache:Table`, (app) => {
-      const Helpers = app.use('Adonis/Src/Helpers')
-      const Generator = require(`../src/Commands/TableGenerator`)
-      return new Generator(Helpers)
-    })
-
-    this.app.bind(`Adonis/Commands/Cache:Config`, (app) => {
-      const Helpers = app.use('Adonis/Src/Helpers')
-      const Generator = require(`../src/Commands/ConfigGenerator`)
-      return new Generator(Helpers)
-    })
+  /**
+   * On boot
+   *
+   * @method boot
+   *
+   * @return {void}
+   */
+  boot () {
+    /**
+     * Register command with ace.
+     */
+    const ace = require('@adonisjs/ace')
+    ace.addCommand('Adonis/Commands/Cache:Config')
+    ace.addCommand('Adonis/Commands/Cache:Table')
   }
 }
 

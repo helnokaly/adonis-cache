@@ -9,11 +9,9 @@
  * file that was distributed with this source code.
 */
 
-const co = require('co')
 const Util = require('../Util')
 
 class DatabaseStore {
-
   constructor (connection, tableName, prefix = '') {
     this._connection = connection
     this._tableName = tableName
@@ -36,21 +34,19 @@ class DatabaseStore {
    * @param  {string} key
    * @return {Promise<mixed>}
    */
-  get (key) {
-    return co(function * () {
-      const cache = yield this._table().where('key', this._prefix + key).first()
+  async get (key) {
+    const cache = await this._table().where('key', this._prefix + key).first()
 
-      if (cache === undefined) {
-        return null
-      }
+    if (cache === undefined) {
+      return null
+    }
 
-      if (Date.now() / 1000 >= cache.expiration) {
-        yield this.forget(key)
-        return null
-      }
+    if (Date.now() / 1000 >= cache.expiration) {
+      await this.forget(key)
+      return null
+    }
 
-      return Util.deserialize(cache.value)
-    }.bind(this))
+    return Util.deserialize(cache.value)
   }
 
   /**
@@ -61,14 +57,13 @@ class DatabaseStore {
    * @param  {Array<string>}  keys
    * @return {Promise<object>}
    */
-  many (keys) {
-    return co(function * () {
-      let mappedValues = {}
-      for (let key of keys) {
-        mappedValues[key] = this.get(key)
-      }
-      return yield mappedValues
-    }.bind(this))
+  async many (keys) {
+    let values = await Promise.all(keys.map(key => this.get(key)))
+    let mappedValues = {}
+    for (let i = 0; i < keys.length; i++) {
+      mappedValues[keys[i]] = values[i]
+    }
+    return mappedValues
   }
 
   /**
@@ -79,18 +74,16 @@ class DatabaseStore {
    * @param  {int}     minutes
    * @return {Promise<void>}
    */
-  put (key, value, minutes = 0) {
-    return co(function * () {
-      const prefixedKey = this._prefix + key
-      const serializedValue = Util.serialize(value)
-      const expiration = Math.floor((Date.now() / 1000) + minutes * 60)
+  async put (key, value, minutes = 0) {
+    const prefixedKey = this._prefix + key
+    const serializedValue = Util.serialize(value)
+    const expiration = Math.floor((Date.now() / 1000) + minutes * 60)
 
-      try {
-        yield this._table().insert({key: prefixedKey, value: serializedValue, expiration: expiration})
-      } catch (e) {
-        yield this._table().where('key', prefixedKey).update({value: serializedValue, expiration: expiration})
-      }
-    }.bind(this))
+    try {
+      await this._table().insert({key: prefixedKey, value: serializedValue, expiration: expiration})
+    } catch (e) {
+      await this._table().where('key', prefixedKey).update({value: serializedValue, expiration: expiration})
+    }
   }
 
   /**
@@ -100,12 +93,12 @@ class DatabaseStore {
    * @param  {int}     minutes
    * @return {Promise<void>}
    */
-  putMany (object, minutes) {
-    return co(function * () {
-      for (let prop in object) {
-        yield this.put(prop, object[prop], minutes)
-      }
-    }.bind(this))
+  async putMany (object, minutes) {
+    let operations = []
+    for (let prop in object) {
+      operations.push(this.put(prop, object[prop], minutes))
+    }
+    await Promise.all(operations)
   }
 
   /**
@@ -159,7 +152,7 @@ class DatabaseStore {
               resolve(false)
               return
             }
-            const newValue = Util.serialize(callback(currentValue))
+            const newValue = callback(currentValue)
             return trx.table(this._tableName).where('key', prefixedKey).update('value', newValue)
               .then(r => resolve(newValue))
           })
@@ -185,11 +178,9 @@ class DatabaseStore {
    * @param  {string}  key
    * @return {Promise<boolean>}
    */
-  forget (key) {
-    return co(function * () {
-      yield this._table().where('key', this._prefix + key).delete()
-      return true
-    }.bind(this))
+  async forget (key) {
+    await this._table().where('key', this._prefix + key).delete()
+    return true
   }
 
   /**
@@ -197,10 +188,8 @@ class DatabaseStore {
    *
    * @return {Promise<void>}
    */
-  flush () {
-    return co(function * () {
-      yield this._table().delete()
-    }.bind(this))
+  async flush () {
+    await this._table().delete()
   }
 
   /**
@@ -220,7 +209,6 @@ class DatabaseStore {
   getPrefix () {
     return this._prefix
   }
-
 }
 
 module.exports = DatabaseStore

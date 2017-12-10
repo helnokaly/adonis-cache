@@ -9,7 +9,6 @@
  * file that was distributed with this source code.
 */
 
-const co = require('co')
 const Util = require('../Util')
 
 // Events
@@ -19,7 +18,6 @@ const KeyForgotten = require('../Events/KeyForgotten')
 const KeyWritten = require('../Events/KeyWritten')
 
 class Repository {
-
   /**
    * Create a new cache repository instance.
    *
@@ -95,10 +93,8 @@ class Repository {
    * @param  {string}  key
    * @return {Promise<boolean>}
    */
-  has (key) {
-    return co(function * () {
-      return (yield this.get(key)) != null
-    }.bind(this))
+  async has (key) {
+    return (await this.get(key)) != null
   }
 
   /**
@@ -108,20 +104,18 @@ class Repository {
    * @param  {mixed}   defaultValue
    * @return {Promise<mixed>}
    */
-  get (key, defaultValue = null) {
-    return co(function * () {
-      let value = yield this._store.get(yield this._itemKey(key))
+  async get (key, defaultValue = null) {
+    let value = await this._store.get(await this._itemKey(key))
 
-      if (value == null) {
-        this._fireCacheEvent('missed', [key])
+    if (value == null) {
+      this._fireCacheEvent('missed', [key])
 
-        return yield Util.valueOf(defaultValue)
-      } else {
-        this._fireCacheEvent('hit', [key, value])
-      }
+      return Util.valueOf(defaultValue)
+    } else {
+      this._fireCacheEvent('hit', [key, value])
+    }
 
-      return value
-    }.bind(this))
+    return value
   }
 
   /**
@@ -132,18 +126,16 @@ class Repository {
    * @param  {Array<string>}  keys
    * @return {Promise<object>}
    */
-  many (keys) {
-    return co(function * () {
-      const values = yield this._store.many(keys)
-      for (let key in values) {
-        if (values[key] == null) {
-          this._fireCacheEvent('missed', [key])
-        } else {
-          this._fireCacheEvent('hit', [key, values[key]])
-        }
+  async many (keys) {
+    const values = await this._store.many(keys)
+    for (let key in values) {
+      if (values[key] == null) {
+        this._fireCacheEvent('missed', [key])
+      } else {
+        this._fireCacheEvent('hit', [key, values[key]])
       }
-      return values
-    }.bind(this))
+    }
+    return values
   }
 
   /**
@@ -153,12 +145,10 @@ class Repository {
    * @param  {mixed}   default
    * @return {Promise<mixed>}
    */
-  pull (key, defaultValue = null) {
-    return co(function * () {
-      const value = yield this.get(key, defaultValue)
-      yield this.forget(key)
-      return value
-    }.bind(this))
+  async pull (key, defaultValue = null) {
+    const value = await this.get(key, defaultValue)
+    await this.forget(key)
+    return value
   }
 
   /**
@@ -169,19 +159,17 @@ class Repository {
    * @param  {Date|float|int}  minutes
    * @return {Promise<void>}
    */
-  put (key, value, minutes = null) {
-    return co(function * () {
-      if (value == null) {
-        return
-      }
+  async put (key, value, minutes = null) {
+    if (value == null) {
+      return
+    }
 
-      minutes = this._getMinutes(minutes)
+    minutes = this._getMinutes(minutes)
 
-      if (minutes != null) {
-        yield this._store.put(yield this._itemKey(key), value, minutes)
-        this._fireCacheEvent('write', [key, value, minutes])
-      }
-    }.bind(this))
+    if (minutes != null) {
+      await this._store.put(await this._itemKey(key), value, minutes)
+      this._fireCacheEvent('write', [key, value, minutes])
+    }
   }
 
   /**
@@ -191,18 +179,16 @@ class Repository {
    * @param  {Date|float|int}  minutes
    * @return {Promise<void>}
    */
-  putMany (values, minutes) {
-    return co(function * () {
-      minutes = this._getMinutes(minutes)
+  async putMany (values, minutes) {
+    minutes = this._getMinutes(minutes)
 
-      if (minutes != null) {
-        yield this._store.putMany(values, minutes)
+    if (minutes != null) {
+      await this._store.putMany(values, minutes)
 
-        for (let key in values) {
-          this._fireCacheEvent('write', [key, values[key], minutes])
-        }
+      for (let key in values) {
+        this._fireCacheEvent('write', [key, values[key], minutes])
       }
-    }.bind(this))
+    }
   }
 
   /**
@@ -213,25 +199,23 @@ class Repository {
    * @param  {DateTime|float|int}  minutes
    * @return {Promise<boolean>}
    */
-  add (key, value, minutes) {
-    return co(function * () {
-      minutes = this._getMinutes(minutes)
+  async add (key, value, minutes) {
+    minutes = this._getMinutes(minutes)
 
-      if (minutes == null) {
-        return false
-      }
-
-      if (typeof this._store['add'] === 'function') {
-        return yield this._store.add(yield this._itemKey(key), value, minutes)
-      }
-
-      if ((yield this.get(key)) == null) {
-        yield this.put(key, value, minutes)
-        return true
-      }
-
+    if (minutes == null) {
       return false
-    }.bind(this))
+    }
+
+    if (typeof this._store['add'] === 'function') {
+      return this._store.add(await this._itemKey(key), value, minutes)
+    }
+
+    if ((await this.get(key)) == null) {
+      await this.put(key, value, minutes)
+      return true
+    }
+
+    return false
   }
 
   /**
@@ -263,11 +247,9 @@ class Repository {
    * @param   {mixed}   value
    * @return  {void}
    */
-  forever (key, value) {
-    return co(function * () {
-      this._store.forever(yield this._itemKey(key), value)
-      this._fireCacheEvent('write', [key, value, 0])
-    }.bind(this))
+  async forever (key, value) {
+    this._store.forever(await this._itemKey(key), value)
+    this._fireCacheEvent('write', [key, value, 0])
   }
 
   /**
@@ -278,20 +260,18 @@ class Repository {
    * @param  {function}          closure
    * @return {Promise<mixed>}
    */
-  remember (key, minutes, closure) {
-      // If the item exists in the cache we will just return this immediately
-      // otherwise we will execute the given Closure and cache the result
-      // of that execution for the given number of minutes in storage.
-    return co(function * () {
-      let value = yield this.get(key)
-      if (value != null) {
-        return value
-      }
-
-      value = yield Util.valueOf(closure)
-      yield this.put(key, value, minutes)
+  async remember (key, minutes, closure) {
+    // If the item exists in the cache we will just return this immediately
+    // otherwise we will execute the given Closure and cache the result
+    // of that execution for the given number of minutes in storage.
+    let value = await this.get(key)
+    if (value != null) {
       return value
-    }.bind(this))
+    }
+
+    value = await Util.valueOf(closure)
+    await this.put(key, value, minutes)
+    return value
   }
 
   /**
@@ -312,20 +292,18 @@ class Repository {
    * @param  {function}  closure
    * @return {Promise<mixed>}
    */
-  rememberForever (key, closure) {
+  async rememberForever (key, closure) {
     // If the item exists in the cache we will just return this immediately
     // otherwise we will execute the given Closure and cache the result
     // of that execution for the given number of minutes. It's easy.
-    return co(function * () {
-      let value = yield this.get(key)
-      if (value != null) {
-        return value
-      }
-
-      value = yield Util.valueOf(closure)
-      yield this.forever(key, value)
+    let value = await this.get(key)
+    if (value != null) {
       return value
-    }.bind(this))
+    }
+
+    value = await Util.valueOf(closure)
+    await this.forever(key, value)
+    return value
   }
 
   /**
@@ -334,12 +312,10 @@ class Repository {
    * @param  {string}  key
    * @return {Promise<boolean>}
    */
-  forget (key) {
-    return co(function * () {
-      const success = yield this._store.forget(yield this._itemKey(key))
-      this._fireCacheEvent('delete', [key])
-      return success
-    }.bind(this))
+  async forget (key) {
+    const success = await this._store.forget(await this._itemKey(key))
+    this._fireCacheEvent('delete', [key])
+    return success
   }
 
   /**
@@ -370,10 +346,8 @@ class Repository {
    * @param  {string}  key
    * @return {Promise<string>}
    */
-  _itemKey (key) {
-    return co(function * () {
-      return key
-    })
+  async _itemKey (key) {
+    return key
   }
 
   /**
@@ -398,7 +372,6 @@ class Repository {
 
     return Math.floor((duration * 60) > 0 ? duration : null)
   }
-
 }
 
 module.exports = Repository

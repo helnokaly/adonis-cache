@@ -23,7 +23,7 @@ class CreateCacheTable extends Schema {
    * @return {void}
    */
   down () {
-    this.dropTableIfExists('cache')
+    this.drop('cache')
   }
 
 }

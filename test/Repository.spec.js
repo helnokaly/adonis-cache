@@ -103,9 +103,9 @@ describe('Repository', function () {
     it('should return generator function value and cache its value for a key that is not in the cache', function () {
       return Repository.put('firstname', 'david', 1)
         .then(r => Repository.put('lastname', 'king'))
-        .then(r => Repository.remember('test', 1, function * () {
-          const temp = yield Repository.get('firstname')
-          const temp2 = yield Repository.get('lastname')
+        .then(r => Repository.remember('test', 1, async () => {
+          const temp = await Repository.get('firstname')
+          const temp2 = await Repository.get('lastname')
           return temp + ' ' + temp2
         }))
         .then(r => expect(r).to.equal('david king'))

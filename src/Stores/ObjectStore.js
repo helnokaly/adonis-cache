@@ -13,7 +13,6 @@ const TaggableStore = require('./TaggableStore')
 const Util = require('../Util')
 
 class ObjectStore extends TaggableStore {
-
   constructor () {
     super()
     this._storage = {}
@@ -25,20 +24,16 @@ class ObjectStore extends TaggableStore {
    * @param  {string} key
    * @return {Promise<mixed>}
    */
-  get (key) {
-    return new Promise((resolve, reject) => {
-      const cache = this._storage[key]
-      if (cache === undefined) {
-        resolve(null)
-        return
-      }
-      if (Date.now() / 1000 >= cache.expiration) {
-        this.forget(key)
-        resolve(null)
-        return
-      }
-      resolve(Util.deserialize(cache.value))
-    })
+  async get (key) {
+    const cache = this._storage[key]
+    if (cache === undefined) {
+      return null
+    }
+    if (Date.now() / 1000 >= cache.expiration) {
+      this.forget(key)
+      return null
+    }
+    return Util.deserialize(cache.value)
   }
 
   /**
@@ -143,7 +138,7 @@ class ObjectStore extends TaggableStore {
         resolve(false)
         return
       }
-      const newValue = Util.serialize(callback(currentValue))
+      const newValue = callback(currentValue)
       this._storage[key].value = newValue
       resolve(newValue)
     })
@@ -166,11 +161,9 @@ class ObjectStore extends TaggableStore {
    * @param  {string}  key
    * @return {Promise<boolean>}
    */
-  forget (key) {
-    return new Promise((resolve, reject) => {
-      delete this._storage[key]
-      resolve(true)
-    })
+  async forget (key) {
+    delete this._storage[key]
+    return true
   }
 
   /**

@@ -10,10 +10,8 @@
 */
 
 const crypto = require('crypto')
-const co = require('co')
 
 class TagSet {
-
   /**
    * Create a new TagSet instance.
    *
@@ -31,12 +29,10 @@ class TagSet {
    *
    * @return {Promise<void>}
    */
-  reset () {
-    return co(function * () {
-      for (let name of this._names) {
-        yield this.resetTag(name)
-      }
-    }.bind(this))
+  async reset () {
+    for (let name of this._names) {
+      await this.resetTag(name)
+    }
   }
 
   /**
@@ -45,11 +41,9 @@ class TagSet {
    * @param  {string}  name
    * @return {Promise<string>}
    */
-  tagId (name) {
-    return co(function * () {
-      const id = yield this._store.get(this.tagKey(name))
-      return id ? id : yield this.resetTag(name)
-    }.bind(this))
+  async tagId (name) {
+    const id = await this._store.get(this.tagKey(name))
+    return id || this.resetTag(name)
   }
 
   /**
@@ -58,10 +52,7 @@ class TagSet {
    * @return {Promise<array>}
    */
   _tagIds () {
-    return co(function * () {
-      const names = this._names.map(name => this.tagId(name))
-      return yield names
-    }.bind(this))
+    return Promise.all(this._names.map(name => this.tagId(name)))
   }
 
   /**
@@ -69,10 +60,8 @@ class TagSet {
    *
    * @return {Promise<string>}
    */
-  getNamespace () {
-    return co(function * () {
-      return (yield this._tagIds()).join('|')
-    }.bind(this))
+  async getNamespace () {
+    return (await this._tagIds()).join('|')
   }
 
   /**
@@ -81,12 +70,10 @@ class TagSet {
    * @param  {string}  name
    * @return {Promise<string>}
    */
-  resetTag (name) {
-    return co(function * () {
-      const id = crypto.randomBytes(8).toString('hex')
-      yield this._store.forever(this.tagKey(name), id)
-      return id
-    }.bind(this))
+  async resetTag (name) {
+    const id = crypto.randomBytes(8).toString('hex')
+    await this._store.forever(this.tagKey(name), id)
+    return id
   }
 
   /**

@@ -12,15 +12,14 @@
 const TaggableStore = require('./TaggableStore')
 
 class NullStore extends TaggableStore {
-
   /**
    * Retrieve an item from the cache by key.
    *
    * @param  {string}  key
    * @return {Promise<mixed>}
    */
-  get (key) {
-    return Promise.resolve(null)
+  async get (key) {
+    return null
   }
 
   /**
@@ -31,12 +30,12 @@ class NullStore extends TaggableStore {
    * @param  {Array<string>}  keys
    * @return {Promise<object>}
    */
-  many (keys) {
+  async many (keys) {
     let mappedValues = {}
     for (let key of keys) {
       mappedValues[key] = null
     }
-    return Promise.resolve(mappedValues)
+    return mappedValues
   }
 
   /**
@@ -47,8 +46,8 @@ class NullStore extends TaggableStore {
    * @param  {float|int}  minutes
    * @return {Promise<void>}
    */
-  put (key, value, minutes) {
-    return Promise.resolve(undefined)
+  async put (key, value, minutes) {
+    return undefined
   }
 
   /**
@@ -58,8 +57,8 @@ class NullStore extends TaggableStore {
    * @param  {int}     minutes
    * @return {Promise<void>}
    */
-  putMany (object, minutes) {
-    return Promise.resolve(undefined)
+  async putMany (object, minutes) {
+    return undefined
   }
 
   /**
@@ -69,8 +68,8 @@ class NullStore extends TaggableStore {
    * @param  {mixed}   value
    * @return {Promise<int|boolean>}
    */
-  increment (key, value = 1) {
-    return Promise.resolve(false)
+  async increment (key, value = 1) {
+    return false
   }
 
   /**
@@ -80,8 +79,8 @@ class NullStore extends TaggableStore {
    * @param  {mixed}   value
    * @return {Promise<int|boolean>}
    */
-  decrement (key, value = 1) {
-    return Promise.resolve(false)
+  async decrement (key, value = 1) {
+    return false
   }
 
   /**
@@ -91,8 +90,8 @@ class NullStore extends TaggableStore {
    * @param  {mixed}   value
    * @return {Promise<void>}
    */
-  forever (key, value) {
-    return Promise.resolve(undefined)
+  async forever (key, value) {
+    return undefined
   }
 
   /**
@@ -101,8 +100,8 @@ class NullStore extends TaggableStore {
    * @param  {string}  key
    * @return {Promise<boolean>}
    */
-  forget (key) {
-    return Promise.resolve(true)
+  async forget (key) {
+    return true
   }
 
   /**
@@ -110,8 +109,8 @@ class NullStore extends TaggableStore {
    *
    * @return {Promise<void>}
    */
-  flush () {
-    return Promise.resolve(undefined)
+  async flush () {
+    return undefined
   }
 
   /**

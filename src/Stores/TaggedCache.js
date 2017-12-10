@@ -10,11 +10,9 @@
 */
 
 const crypto = require('crypto')
-const co = require('co')
 const Repository = require('./Repository')
 
 class TaggedCache extends Repository {
-
   /**
    * Create a new tagged cache instance.
    *
@@ -42,10 +40,8 @@ class TaggedCache extends Repository {
    * @param  {mixed}   value
    * @return {Promsie<void>}
    */
-  increment (key, value = 1) {
-    return co(function * () {
-      return yield this._store.increment(yield this._itemKey(key), value)
-    }.bind(this))
+  async increment (key, value = 1) {
+    return this._store.increment(await this._itemKey(key), value)
   }
 
   /**
@@ -55,10 +51,8 @@ class TaggedCache extends Repository {
    * @param  {mixed}   value
    * @return {Promise<void>}
    */
-  decrement (key, value = 1) {
-    return co(function * () {
-      return yield this._store.decrement(yield this._itemKey(key), value)
-    }.bind(this))
+  async decrement (key, value = 1) {
+    return this._store.decrement(await this._itemKey(key), value)
   }
 
   /**
@@ -83,10 +77,8 @@ class TaggedCache extends Repository {
    * @param  {string}  key
    * @return {Promise<string>}
    */
-  taggedItemKey (key) {
-    return co(function * () {
-      return crypto.createHash('sha1').update(yield this._tags.getNamespace()).digest('hex') + ':' + key
-    }.bind(this))
+  async taggedItemKey (key) {
+    return crypto.createHash('sha1').update(await this._tags.getNamespace()).digest('hex') + ':' + key
   }
 }
 

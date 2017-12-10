@@ -16,7 +16,6 @@ const Repository = new (require('../src/Stores/Repository'))(Store)
 // const TagSet = new(require('../src/Stores/TagSet'))(Store, ['post', 'bo', 'offer'])
 // const RedisTaggedCache = new(require('../src/Stores/RedisTaggedCache'))(Store, TagSet)
 
-
 Repository.setEventDispatcher({
   fire: function (event, model) {
     // console.log(event, '\n', model)

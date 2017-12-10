@@ -12,10 +12,8 @@
 const TaggedCache = require('./TaggedCache')
 const crypto = require('crypto')
 const _ = require('lodash')
-const co = require('co')
 
 class RedisTaggedCache extends TaggedCache {
-
   /**
    * Store an item in the cache.
    *
@@ -24,18 +22,9 @@ class RedisTaggedCache extends TaggedCache {
    * @param  {Date|float|int}  minutes
    * @return {Promise<void>}
    */
-  put (key, value, minutes = null) {
-    // return co(function * () {
-    //   yield this._pushStandardKeys(yield this._tags.getNamespace(), key)
-    //   yield super.put(key, value, minutes)
-    // }.bind(this))
-    return new Promise((resolve, reject) => {
-      this._tags.getNamespace()
-        .then(namespace => this._pushStandardKeys(namespace, key))
-        .then(r => super.put(key, value, minutes))
-        .then(r => resolve())
-        .catch(e => reject(e))
-    })
+  async put (key, value, minutes = null) {
+    await this._pushStandardKeys(await this._tags.getNamespace(), key)
+    await super.put(key, value, minutes)
   }
 
   /**
@@ -45,18 +34,9 @@ class RedisTaggedCache extends TaggedCache {
    * @param  {mixed}   value
    * @return {Promise<void>}
    */
-  forever (key, value) {
-    // return co(function * () {
-    //   yield this._pushForeverKeys(yield this._tags.getNamespace(), key)
-    //   yield super.forever(key, value)
-    // }.bind(this))
-    return new Promise((resolve, reject) => {
-      this._tags.getNamespace()
-        .then(namespace => this._pushForeverKeys(namespace, key))
-        .then(r => super.forever(key, value))
-        .then(r => resolve())
-        .catch(e => reject(e))
-    })
+  async forever (key, value) {
+    await this._pushForeverKeys(await this._tags.getNamespace(), key)
+    await super.forever(key, value)
   }
 
   /**
@@ -64,19 +44,10 @@ class RedisTaggedCache extends TaggedCache {
    *
    * @return {Promise<void>}
    */
-  flush () {
-    // return co(function * () {
-    //   yield this._deleteForeverKeys()
-    //   yield this._deleteStandardKeys()
-    //   yield super.flush()
-    // }.bind(this))
-    return new Promise((resolve, reject) => {
-      this._deleteForeverKeys()
-        .then(r => this._deleteStandardKeys())
-        .then(r => super.flush())
-        .then(r => resolve())
-        .catch(e => reject(e))
-    })
+  async flush () {
+    await this._deleteForeverKeys()
+    await this._deleteStandardKeys()
+    await super.flush()
   }
 
   /**
@@ -115,13 +86,11 @@ class RedisTaggedCache extends TaggedCache {
    *
    * @private
    */
-  _pushKeys (namespace, key, reference) {
-    return co(function * () {
-      const fullKey = this._store.getPrefix() + crypto.createHash('sha1').update(namespace).digest('hex') + ':' + key
-      for (let segment of namespace.split('|')) {
-        yield this._store.connection().sadd(this._referenceKey(segment, reference), fullKey)
-      }
-    }.bind(this))
+  async _pushKeys (namespace, key, reference) {
+    const fullKey = this._store.getPrefix() + crypto.createHash('sha1').update(namespace).digest('hex') + ':' + key
+    for (let segment of namespace.split('|')) {
+      await this._store.connection().sadd(this._referenceKey(segment, reference), fullKey)
+    }
   }
 
   /**
@@ -154,13 +123,11 @@ class RedisTaggedCache extends TaggedCache {
    *
    * @private
    */
-  _deleteKeysByReference (reference) {
-    return co(function * () {
-      for (let segment of yield this._tags.getNamespace()) {
-        yield this._deleteValues(segment = this._referenceKey(segment, reference))
-        yield this._store.connection().del(segment)
-      }
-    }.bind(this))
+  async _deleteKeysByReference (reference) {
+    for (let segment of await this._tags.getNamespace()) {
+      await this._deleteValues(segment = this._referenceKey(segment, reference))
+      await this._store.connection().del(segment)
+    }
   }
 
   /**
@@ -171,13 +138,11 @@ class RedisTaggedCache extends TaggedCache {
    *
    * @private
    */
-  _deleteValues (referenceKey) {
-    return co(function * () {
-      const values = _.uniq(yield this._store.connection().smembers(referenceKey))
-      for (let i = 0; i < values.length; i++) {
-        yield this._store.connection().del(values[i])
-      }
-    }.bind(this))
+  async _deleteValues (referenceKey) {
+    const values = _.uniq(await this._store.connection().smembers(referenceKey))
+    for (let i = 0; i < values.length; i++) {
+      await this._store.connection().del(values[i])
+    }
   }
 
   /**

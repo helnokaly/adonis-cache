@@ -14,7 +14,6 @@ const TagSet = require('./TagSet')
 
 // Abstract
 class TaggableStore {
-
   /**
    * Begin executing a new tags operation.
    *
