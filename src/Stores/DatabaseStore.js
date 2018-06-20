@@ -16,6 +16,13 @@ class DatabaseStore {
     this._connection = connection
     this._tableName = tableName
     this._prefix = prefix
+
+    /**
+     * Probability (parts per million) that garbage collection (GC) should be performed
+     * when storing a piece of data in the cache. Defaults to 100, meaning 0.01% chance.
+     * This number should be between 0 and 1000000. A value 0 meaning no GC will be performed at all.
+     */
+    this._gcProbability = 100;
   }
 
   /**
@@ -84,6 +91,9 @@ class DatabaseStore {
     } catch (e) {
       await this._table().where('key', prefixedKey).update({value: serializedValue, expiration: expiration})
     }
+
+    // Call garbage collection function
+    await this._gc()
   }
 
   /**
@@ -208,6 +218,17 @@ class DatabaseStore {
    */
   getPrefix () {
     return this._prefix
+  }
+
+  /**
+   * Removes the expired data values.
+   * @param {bool} force whether to enforce the garbage collection regardless of [[gcProbability]].
+   * Defaults to false, meaning the actual deletion happens with the probability as specified by [[gcProbability]].
+   */
+  async _gc (force = false) {
+    if (force || Util.randomIntBetween(0, 1000000) < this._gcProbability) {
+      await this._table().where('expiration', '<=', Math.floor(Date.now() / 1000)).delete()
+    }
   }
 }
 
