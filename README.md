@@ -20,7 +20,7 @@ This is a cache service provider for AdonisJS framework
 ## Installation
 
 ```js
-npm install adonis-cache --save
+npm i adonis-cache --save
 ```
 
 After installation, you need to register the providers inside `start/app.js` file.
@@ -55,7 +55,7 @@ const aliases = {
 
 Then, for generating a config file.
 ```bash
-./ace cache:config
+adonis cache:config
 ```
 
 <a name="configuration"></a>
