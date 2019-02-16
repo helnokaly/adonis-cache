@@ -24,13 +24,13 @@
     "@adonisjs/fold": "^4.0.2",
     "chai": "^4.1.2",
     "ioredis": "^3.2.2",
-    "knex": "^0.14.2",
+    "knex": "^0.16.3",
     "mocha": "^4.0.1",
-    "sqlite3": "^3.1.8",
+    "sqlite3": "^4.0.6",
     "standard": "^10.0.3"
   },
   "dependencies": {
-    "lodash": "^4.17.4"
+    "lodash": "^4.17.11"
   },
   "standard": {
     "globals": [
