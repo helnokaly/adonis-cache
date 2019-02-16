@@ -1,5 +1,6 @@
 'use strict'
 
+const TestHelpers = require('./TestHelpers')
 const chai = require('chai')
 const expect = chai.expect
 
@@ -16,14 +17,14 @@ const Store = new (require('../src/Stores/DatabaseStore'))(knex, 'cache', 'adoni
 describe('Database Store', function () {
   describe('Initializing', function () {
     it('Should create a database table for caching if it does not exist or empty existing one', async () => {
-      try {
-        await knex.schema.createTableIfNotExists('cache', function (table) {
+      if (await knex.schema.hasTable('cache')) {
+        await knex.table('cache').del()
+      } else {
+        await knex.schema.createTable('cache', function (table) {
           table.string('key').unique()
           table.text('value')
           table.integer('expiration')
         })
-      } catch (error) {
-        await knex.table('cache').delete()
       }
     })
   })
@@ -147,26 +148,35 @@ describe('Database Store', function () {
       expect(await Store.get('framework')).to.equal('adonis')
     })
 
-    it('Should not be able to get key value after 1 minute', function (done) {
+    it('Should not be able to get key value after 1 minute', async function () {
       this.timeout(1 * 60 * 1000 + 5000)
-      setTimeout(function () {
-        Store.get('framework')
-          .then(r => expect(r).to.equal(null))
-          .then(r => done())
-          .catch(error => done(error))
-      }, 1 * 60 * 1000)
+      await TestHelpers.sleep(1 * 60 * 1000)
+      expect(await Store.get('framework')).to.equal(null)
     })
 
-    it('Should not be able to get an expired key (0 minutes)', function (done) {
-      Store.put('year', 2016)
-        .then(r => {
-          setTimeout(function () {
-            Store.get('year')
-              .then(r2 => expect(r2).to.equal(null))
-              .then(_ => done())
-              .catch(error => done(error))
-          }, 1 * 1000)
-        })
+    it('Should not be able to get an expired key (0 minutes)', async function () {
+      this.timeout(5000)
+      await Store.put('year', 2016)
+      await TestHelpers.sleep(1000)
+      expect(await Store.get('year')).to.equal(null)
+    })
+
+    it('Should allow expiration in sub minute (seconds)', async function () {
+      this.timeout(10000)
+      let key = 'submin-key-1'
+      let value = 'submin-value-1'
+      await Store.put(key, value, 5 / 60)
+      await TestHelpers.sleep(3000)
+      expect(await Store.get(key)).to.equal(value)
+    })
+
+    it('Should not be able to get an expired key (seconds)', async function () {
+      this.timeout(10000)
+      let key = 'submin-key-2'
+      let value = 'submin-value-2'
+      await Store.put(key, value, 5 / 60)
+      await TestHelpers.sleep(6000)
+      expect(await Store.get(key)).to.equal(null)
     })
   })
 })

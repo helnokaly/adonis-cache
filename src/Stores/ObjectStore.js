@@ -60,7 +60,7 @@ class ObjectStore extends TaggableStore {
    *
    * @param  {string}  key
    * @param  {mixed}     value
-   * @param  {int}     minutes
+   * @param  {int|float}     minutes
    * @return {Promise<void>}
    */
   put (key, value, minutes = 0) {

@@ -78,7 +78,7 @@ class DatabaseStore {
    *
    * @param  {string}  key
    * @param  {mixed}   value
-   * @param  {int}     minutes
+   * @param  {int|float}     minutes
    * @return {Promise<void>}
    */
   async put (key, value, minutes = 0) {

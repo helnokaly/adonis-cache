@@ -370,7 +370,7 @@ class Repository {
       duration = ((duration.getTime() - Date.now()) / 1000) / 60
     }
 
-    return Math.floor((duration * 60) > 0 ? duration : null)
+    return (duration * 60) > 0 ? duration : null
   }
 }
 
