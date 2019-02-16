@@ -63,7 +63,7 @@ adonis cache:config
 
 AdonisCache provides an expressive, unified API for various caching backends. The cache configuration is located at `config/cache.js`. In this file you may specify which cache driver you would like used by default throughout your application. AdonisCache supports popular caching backends like [Redis](http://redis.io) out of the box.
 
-The cache configuration file also contains various other options, which are documented within the file, so make sure to read over these options. By default, AdonisCache is configured to use the `object` cache driver, which stores cached objects in plain JavaScript object. For larger applications, it is recommended that you use a more robust driver such as Redis. You may even configure multiple cache configurations for the same driver.
+The cache configuration file also contains various other options, which are documented within the file, so make sure to read over these options. By default, AdonisCache is configured to use the `object` cache driver, which stores cached objects in plain JavaScript object (use only for development). For larger applications, it is recommended that you use a more robust driver such as Redis. You may even configure multiple cache configurations for the same driver.
 
 <a name="driver-prerequisites"></a>
 ### Driver Prerequisites
