@@ -271,7 +271,7 @@ class Repository {
 
     value = await Util.valueOf(closure)
     await this.put(key, value, minutes)
-    return value
+    return Util.deserialize(Util.serialize(value))
   }
 
   /**
@@ -303,7 +303,7 @@ class Repository {
 
     value = await Util.valueOf(closure)
     await this.forever(key, value)
-    return value
+    return Util.deserialize(Util.serialize(value))
   }
 
   /**
