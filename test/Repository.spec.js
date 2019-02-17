@@ -100,9 +100,9 @@ describe('Repository', function () {
   })
 
   describe('remember', function () {
-    it('should return generator function value and cache its value for a key that is not in the cache', function () {
+    it('should return async function value and cache its value for a key that is not in the cache', function () {
       return Repository.put('firstname', 'david', 1)
-        .then(r => Repository.put('lastname', 'king'))
+        .then(r => Repository.put('lastname', 'king', 1))
         .then(r => Repository.remember('test', 1, async () => {
           const temp = await Repository.get('firstname')
           const temp2 = await Repository.get('lastname')
@@ -115,7 +115,7 @@ describe('Repository', function () {
 
     it('should return promise value and cache its value for a key that is not in the cache', function () {
       return Repository.put('firstname2', 'david', 1)
-        .then(r => Repository.put('lastname2', 'king'))
+        .then(r => Repository.put('lastname2', 'king', 1))
         .then(r => Repository.remember('test2', 1, function () {
           return Repository.get('firstname2')
             .then(r2 => Repository.get('lastname2')
